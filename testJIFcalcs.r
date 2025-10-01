@@ -20,6 +20,6 @@ n.cit <- chub %>%
   summarize(count = n()) # JGLR is cited in Chub report 6 times 
 
 # calculate COSEWIC listing IF (ESA listing IF equivalent)
-jglr.cos.if <- 6/mean_cit
+jglr.cos.if <- 6/mean_cit # 0.0332
 
 
