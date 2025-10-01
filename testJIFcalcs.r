@@ -13,7 +13,13 @@ chub <- df[2:23,] %>% # keep only rows associated with Chub
          tot.cit.2yr = as.numeric(tot.cit.2yr)) # make a number (instead of character)
 
 # calculating mean JIF for the journal and mean total citable items
-mean_jif <- mean(chub$JIF) 
-mean_cit <- mean(chub$tot.cit.2yr)
+mean_jif <- mean(chub$JIF) # mean JIF for JGLR is 1.55
+mean_cit <- mean(chub$tot.cit.2yr) # mean total citable items is 181
+n.cit <- chub %>%
+  group_by(Journal) %>%
+  summarize(count = n()) # JGLR is cited in Chub report 6 times 
+
+# calculate COSEWIC listing IF (ESA listing IF equivalent)
+jglr.cos.if <- 6/mean_cit
 
 
