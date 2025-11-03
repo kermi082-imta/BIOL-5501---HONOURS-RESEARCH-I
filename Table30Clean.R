@@ -35,6 +35,3 @@ table_plot <- ggtexttable( tablecleantop30_sorted,rows = NULL,  # Hide row numbe
 
 table_plot
 ggsave("top30_table_plot.pdf", table_plot, width = 8, height = 10)
-
-# How to make the table with ggplot? 
-# Why can't I make it an Rmd file? Why is it an R file? confusion. 
