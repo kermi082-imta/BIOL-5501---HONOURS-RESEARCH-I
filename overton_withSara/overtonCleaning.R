@@ -1,22 +1,25 @@
 library(tidyverse)
 
-# load in the reports CSV and make a test data set of five obs to try things out 
-df <- read_delim("reports.csv")
-test <- df[1:5,] %>%
-  select("Title of citing document") %>%
-  rename(title = "Title of citing document")
+# load in the reports CSV and make a test data set of five obs to try things out.
+df <- read_delim("reports.csv") #loading in the "reports.csv" file into R. 
+test <- df[1:5,] %>% # choosing the first 5 entries from the reports file. 
+  select("Title of citing document") %>% # Only having the first 5 entries and their "Title of Citing Document" Column. 
+  rename(title = "Title of citing document") # Renamed the long column name to "title" for more efficient coding. 
 
 # testing regex to extract strings and make new column with date 
-str_extract(test$title,"(\\d\\d\\d\\d)+(?=E)") 
+str_extract(test$title,"(\\d\\d\\d\\d)+(?=E)") #allowed us to extract the 4 wildcard digits that occur before the "E" from the title in "test". 
+# we know that they should all be 2010, checking to see if the code worked in the way we wanted it to. 
 
 test %>% 
-  mutate(year = str_extract(test$title,"(\\d\\d\\d\\d)+(?=E)"))
+  mutate(year = str_extract(test$title,"(\\d\\d\\d\\d)+(?=E)")) # using the string extract function, the 4 wildcard digits that are before the "E" from the title in "test" is taken and mutated to create a new column in the "test" data set called "year". 
 
 # testing the separate for species name pull
 test %>%
   separate(title, into = c(NA, "int1"), sep = "COSEWIC assessment and status report on the ") %>%
   separate(int1, into = c("full.spp", NA), sep = ", in Canada") %>%
   separate(full.spp, into = c("Common", "Latin"), sep = ', ')
+
+#QUESTION FOR SARA: What is "int1" 
 
 
 # full df clean - kinda janky but keeping the full.test$year as separate from the int.clean obj makes it easier to pull on previously created obj
