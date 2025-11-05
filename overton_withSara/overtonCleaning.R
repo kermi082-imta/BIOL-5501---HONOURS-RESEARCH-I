@@ -94,7 +94,7 @@ missing.latin <- df.clean.combo %>%
 clean.missing.lat <- missing.latin %>%
   separate(common, into = c(NA, "common"), sep = 'the ') %>%
   separate(common, into = c("common", NA), sep = ' in Canada.') %>%
-  separate(common, into = c("common", "latin"), sep = '\\(')
+  separate(common, into = c("common", "latin"), sep = ' \\(')
 
 clean.missing.lat$latin <- gsub(")", "", clean.missing.lat$latin)
 # ASK SARA!
