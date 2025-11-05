@@ -111,10 +111,12 @@ final.clean <- df.clean.combo %>%
 missing.latin.final <- final.clean %>% 
   filter(is.na(latin)) %>%
   distinct(pub.title) # only NA 
+# All reports in the current data frame that don't have a latin name. 
 
 missing.common.final <- final.clean %>%
   filter(is.na(common)) %>%
   distinct(latin)
+# Manually place the common name. 
 
 # find entries with more than one year to manually choose which report to keep
 dup.years <- final.clean %>%
@@ -122,6 +124,7 @@ dup.years <- final.clean %>%
   group_by(common, latin) %>%
   summarise(n.years = n_distinct(year), .groups = "drop") %>%
   filter(n.years > 1)
+# 66 species that have more than 2 observation. Find more recent year and choose that one. 
 
 # write out CSVs 
 write_delim(missing.latin.final, "missingLatin.csv", delim = ',')
