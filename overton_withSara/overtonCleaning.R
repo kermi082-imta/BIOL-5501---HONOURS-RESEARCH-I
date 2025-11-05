@@ -24,21 +24,25 @@ test %>%
   separate(int1, into = c("full.spp", NA), sep = ", in Canada") %>%
 # Using the separate function, the contents of int1 column is separated with the separator being ", in Canada", keeping the contents prior to the separator and placing it into a column labelled "full.spp" and ignoring the contents after the separator.  
   separate(full.spp, into = c("Common", "Latin"), sep = ', ')
-
+# Using the separate function, the contents of full.spp column is separated with the separator being ", ", keeping the contents on both side of the separator with the contents prior placed in the "Common" column and the contents after the separator placed in the "Latin" column. 
 
 # full df clean - kinda janky but keeping the full.test$year as separate from the int.clean obj makes it easier to pull on previously created obj
-df.pub.year <- df %>%
-  rename(title = "Title of citing document",
-         pub.date = "Published on date of citing document") %>%
+
+df.pub.year <- df %>% #cleaning title names and separating the year of publication from the pub.date column. 
+  rename(title = "Title of citing document", pub.date = "Published on date of citing document") %>%
+# from the loaded overton database called "df", the long titles were renamed for more efficient coding.
   separate(pub.date, into = c("pub.year"), sep = '-', extra = "drop") 
+#separates the first part of the pub.date using the "-" separator and drops the other parts. 
 
 # making intermediate obj so string extract works properly
 int.year <- df.pub.year %>%
   mutate(year = str_extract(df.pub.year$title,"(\\d\\d\\d\\d)+(?=E)"))
+#string extract from title. 
 
 # make int obj to replace year with pub.year if year is NA 
 int.year.narepl <- int.year %>%
   mutate(year = ifelse(is.na(int.year$year), int.year$pub.year, int.year$year))
+#ASK SARA!!! - How to explain this code? 
 
 # create clean df with spp names pulled out into Common & Latin columns
 df.clean <- int.year.narepl %>%
@@ -90,6 +94,7 @@ clean.missing.lat <- missing.latin %>%
   separate(common, into = c("common", "latin"), sep = '\\(')
 
 clean.missing.lat$latin <- gsub(")", "", clean.missing.lat$latin)
+# ASK SARA!
 
 # remove spp with NAs in Latin
 final.clean <- df.clean.combo %>%
