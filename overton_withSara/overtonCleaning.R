@@ -89,7 +89,7 @@ missing.common <- df.clean.combo %>%
 
 # check for any NAs in Latin name
 missing.latin <- df.clean.combo %>%
-  filter(is.na(latin))# 872 :( 
+  filter(is.na(latin)) #872 :( 
 
 clean.missing.lat <- missing.latin %>%
   separate(common, into = c(NA, "common"), sep = 'the ') %>%
@@ -97,7 +97,6 @@ clean.missing.lat <- missing.latin %>%
   separate(common, into = c("common", "latin"), sep = ' \\(')
 
 clean.missing.lat$latin <- gsub(")", "", clean.missing.lat$latin)
-# ASK SARA!
 # In the latin column a gsub ")" replace it with noting in the clean.missing.lat$latin column which will be save in the clean.missing.lat
 
 # remove spp with NAs in Latin
@@ -125,6 +124,7 @@ dup.years <- final.clean %>%
   filter(n.years > 1)
 
 # write out CSVs 
+write_delim(missing.latin.final, "missingLatin.csv", delim = ',')
 write_delim(missing.common.final, "missingCommon.csv", delim = ',')
 write_delim(dup.years, "dupYears.csv", delim = ',')
 
