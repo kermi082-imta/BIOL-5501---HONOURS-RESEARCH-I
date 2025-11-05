@@ -1,7 +1,7 @@
 library(tidyverse)
 
 # load in the reports CSV and make a test data set of five obs to try things out.
-df <- read_delim("reports.csv") #loading in the "reports.csv" file into R. 
+df <- read_delim("overton_withSara/reports.csv") #loading in the "reports.csv" file into R. 
 test <- df[1:5,] %>% # choosing the first 5 entries from the reports file. 
   select("Title of citing document") %>% 
   # Only having the first 5 entries and their "Title of Citing Document" Column. 
