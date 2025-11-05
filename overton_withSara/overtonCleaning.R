@@ -43,16 +43,19 @@ int.year <- df.pub.year %>%
 int.year.narepl <- int.year %>%
   mutate(year = ifelse(is.na(int.year$year), int.year$pub.year, int.year$year))
 #ASK SARA!!! - How to explain this code? 
+# New column called "year" which already exists in the int.year object. If there's no information in the int.year column pull the information from pub.year. IFELSE FUNCTIION!!!
 
 # create clean df with spp names pulled out into Common & Latin columns
 df.clean <- int.year.narepl %>%
   mutate(pub.title = title) %>%
   separate(title, into = c(NA, "int1"), sep = "COSEWIC assessment and status report on ") %>%
+  # trial and error. separator can't include "the" because of the way they wrote the title. 
   separate(int1, into = c("full.spp", NA), sep = ", in Canada") %>%
   separate(full.spp, into = c("common", "latin"), sep = ', ') %>%
   select(common, latin, year, `Cited source or journal`, pub.year, pub.title)
 
 # some NAs in species name based on differing titles of reports - mostly that some reports are 'update status' rather than 'status'
+#Some species were listed as NA in the common name, the titles were slightly different. 
 
 # pull all the species that have NA as Common because they are update reports 
 update.spp <- df.clean %>%
@@ -95,6 +98,7 @@ clean.missing.lat <- missing.latin %>%
 
 clean.missing.lat$latin <- gsub(")", "", clean.missing.lat$latin)
 # ASK SARA!
+# In the latin column a gsub ")" replace it with noting in the clean.missing.lat$latin column which will be save in the clean.missing.lat
 
 # remove spp with NAs in Latin
 final.clean <- df.clean.combo %>%
@@ -102,6 +106,7 @@ final.clean <- df.clean.combo %>%
   bind_rows(clean.missing.lat) %>%
   separate(common, into = c(NA, "common"), sep = 'the ') %>%
   rename(source = "Cited source or journal")
+#final.clean are missing species that don't have a latin name. 
 
 # find the entries that will need manual changing bc they do not all have the same patterns to match
 missing.latin.final <- final.clean %>% 
