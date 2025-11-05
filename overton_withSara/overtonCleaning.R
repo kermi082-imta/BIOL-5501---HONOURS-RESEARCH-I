@@ -125,6 +125,7 @@ dup.years <- final.clean %>%
   summarise(n.years = n_distinct(year), .groups = "drop") %>%
   filter(n.years > 1)
 # 66 species that have more than 2 observation. Find more recent year and choose that one. 
+# Make a clean csv without the duplicates.
 
 # write out CSVs 
 write_delim(missing.latin.final, "overton_withSara/missingLatin.csv", delim = ',')
