@@ -127,7 +127,8 @@ dup.years <- final.clean %>%
 # 66 species that have more than 2 observation. Find more recent year and choose that one. 
 
 # write out CSVs 
-write_delim(missing.latin.final, "missingLatin.csv", delim = ',')
-write_delim(missing.common.final, "missingCommon.csv", delim = ',')
-write_delim(dup.years, "dupYears.csv", delim = ',')
+write_delim(missing.latin.final, "overton_withSara/missingLatin.csv", delim = ',')
+write_delim(missing.common.final, "overton_withSara/missingCommon.csv", delim = ',')
+write_delim(dup.years, "overton_withSara/dupYears.csv", delim = ',')
+write_delim(final.clean, "overton_withSara/cleanDB.csv", delim = ',')
 
