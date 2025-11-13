@@ -1,7 +1,8 @@
 library(tidyverse)
 setwd("~/Desktop/BIOL 5501/BIOL 5501 RESEARCH/overton_withSara")
 
-df <- read_delim("cleanDB_wip.csv")
+df <- read_delim("cleanDB_wip.csv") %>%
+  mutate(common = str_to_title(common))
 View(df)
 
 #Grouping Common and Latin names with NAs
@@ -12,7 +13,7 @@ na_commonandlatin <- df %>%
 head(na_commonandlatin) 
 #Showed only on pub.title doesn't have either common or latin names which makes sense since this assessment is on the Athabasca endemics which encompasses multiple species. Also shows that there are 63 citations from this assessment. 
 
-na_sources <- df %>%
+na_sources.test <- df %>%
   filter(is.na(source)) %>%
   group_by(common) %>%
   summarise(count = n())
