@@ -13,7 +13,7 @@ na_commonandlatin <- df %>%
 head(na_commonandlatin) 
 #Showed only on pub.title doesn't have either common or latin names which makes sense since this assessment is on the Athabasca endemics which encompasses multiple species. Also shows that there are 63 citations from this assessment. 
 
-na_sources.test <- df %>%
+na_sources <- df %>%
   filter(is.na(source)) %>%
   group_by(common) %>%
   summarise(count = n())
