@@ -20,53 +20,24 @@ na_sources <- df %>%
 # Shows how many NAs per "common" species are found in the "source" column. 
 View(na_sources)
 
-dupyears <- read_delim("dupYears.csv")
-View(dupyears)
-#Opening the "dupYears.csv" previously created. 
-
-df %>%
-  filter(common == "American eel") %>%
-  distinct(year) # 2012 and 2006
-
-# Searching for the most recent assessment. 
-df %>%
-  filter(common == "American marten") %>%
-  distinct(year) # 2022 and 2007
-
-df %>%
-  filter(common == "Bering cisco") %>%
-  distinct(year) #2005 and 1970
-
-df %>%
-  filter(common == "American eel") %>%
-  distinct(year) # 2012
-
-df %>%
-  filter(common == "American marten") %>%
-  distinct(year) # 2022
-
-df %>%
-  filter(common == "Bird's-foot violet") %>%
-  distinct(year) # 2003 and 2002
-
-df %>%
-  filter(common == "Black redhorse") %>%
-  distinct(year) # 2015 and 2005
-
-df %>%
-  filter(common == "Blue shark") %>%
-  distinct(year) # 2017 and 2006
-
-df %>%
-  filter(common == "Bluehearts") %>%
-  distinct(year) 
 
 #Wanted to check if there's a more efficient way. Found a function online that selects the max value. Used on "year" column while grouping "common" column. 
-df_latest <- df %>%
+cleanestdb <- df %>%
   group_by(common) %>%
   slice_max(order_by = year) #Found function online that allows us to select max value. 
+View(cleanestdb) 
+
+df_latest_countsource <- cleanestdb %>%
+  count(source)
+View(df_latest_countsource)
 #Searched df for "American Eel" and the year provided, showed 2012 which is the most recent supported by the filter and distinct functions. 
+write_delim(cleanestdb, "cleanestdb.csv", delim = ',')
 
-#ASK SARA: Would there be a way to get rid of all the duplicates? Instead of having one species list a year multiple times, can it just list it once? 
-View(df_latest)
+View(cleanestdb) 
 
+df_latest_unique_sources <- df_latest %>%
+  distinct(common, source) %>%
+  group_by(common) %>%
+  summarise(count_sources = n())
+
+View(df_latest_unique_sources) 

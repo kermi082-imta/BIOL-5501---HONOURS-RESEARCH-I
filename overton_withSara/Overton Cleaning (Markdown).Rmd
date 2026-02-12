@@ -66,11 +66,12 @@ Using the separate function, the contents of the "full.spp" column is separated 
 # Full df Clean 
 ```{r}
 df.pub.year <- df %>% 
-  rename(title = "Title of citing document", pub.date = "Published on date of citing document") %>%
+  rename(title = "Title of citing document", pub.date = "Cited published on date") %>%
   separate(pub.date, into = c("pub.year"), sep = '-', extra = "drop") 
 ```
 
 Cleaning title names and separating the year of publication from the "pub.date" column. From the loaded overton database called "df', the long titles were renamed for more efficient coding. Separates the first part of the "pub.date" using the "-" separator and drops the other parts. 
+EDIT: Changed the source column that created pub.date column. 
 
 ## Making Intermediate Obj So That the String Extract Works Properly
 ```{r}
@@ -85,8 +86,16 @@ Using the str_extract, from the "title" column of the df.pub.year" data frame, t
 int.year.narepl <- int.year %>%
   mutate(year = ifelse(is.na(int.year$year), int.year$pub.year, int.year$year))
 ```
-
+*ASK SARA!! - Why'd we do this??
 Uses an IF-ELSE function!!
+
+##KHRIS ACTION:
+
+SEPARATE - "Published on date of citing document" column into something like "cited.pub.year". KEEP ONLY THE YEAR. 
+CHANGE IF-ELSE statement. 
+Use the is.na function to search for them. 
+
+
 There's a new column called "year" which already exists in the "int.year" object. If there's no information in the int.year column pull the information from "pub.year" column. 
 
 ## Create Clean Dataframe with "spp names" Pulled Out into Common and Latin Columns
@@ -233,8 +242,8 @@ dup.years <- final.clean %>%
 
 # Write Out CSVs
 ```{r}
-write_delim(missing.latin.final, "overton_withSara/missingLatin.csv", delim = ',')
-write_delim(missing.common.final, "overton_withSara/missingCommon.csv", delim = ',')
-write_delim(dup.years, "overton_withSara/dupYears.csv", delim = ',')
-write_delim(final.clean, "overton_withSara/cleanDB.csv", delim = ',')
+write_delim(missing.latin.final, "overton_withSara/missingLatinupdate.csv", delim = ',')
+write_delim(missing.common.final, "overton_withSara/missingCommonupdate.csv", delim = ',')
+write_delim(dup.years, "overton_withSara/dupYearsupdate.csv", delim = ',')
+write_delim(final.clean, "overton_withSara/cleanDBupdate.csv", delim = ',')
 ```

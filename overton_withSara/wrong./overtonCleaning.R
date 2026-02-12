@@ -1,5 +1,6 @@
 library(tidyverse)
 
+
 # load in the reports CSV and make a test data set of five obs to try things out.
 df <- read_delim("overton_withSara/reports.csv") #loading in the "reports.csv" file into R. 
 test <- df[1:5,] %>% # choosing the first 5 entries from the reports file. 
@@ -33,7 +34,7 @@ df.pub.year <- df %>% #cleaning title names and separating the year of publicati
 # from the loaded overton database called "df", the long titles were renamed for more efficient coding.
   separate(pub.date, into = c("pub.year"), sep = '-', extra = "drop") 
 #separates the first part of the pub.date using the "-" separator and drops the other parts. 
-
+ 
 # making intermediate obj so string extract works properly
 int.year <- df.pub.year %>%
   mutate(year = str_extract(df.pub.year$title,"(\\d\\d\\d\\d)+(?=E)"))
@@ -132,4 +133,3 @@ write_delim(missing.latin.final, "overton_withSara/missingLatin.csv", delim = ',
 write_delim(missing.common.final, "overton_withSara/missingCommon.csv", delim = ',')
 write_delim(dup.years, "overton_withSara/dupYears.csv", delim = ',')
 write_delim(final.clean, "overton_withSara/cleanDB.csv", delim = ',')
-

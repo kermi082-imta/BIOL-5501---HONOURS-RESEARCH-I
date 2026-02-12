@@ -9,7 +9,8 @@ library(knitr)
 
 setwd("/Users/khristianne_e/Desktop/BIOL 5501/BIOL 5501 RESEARCH")
 
-top30updated <- read_csv("updatedtop30journals.csv")
+top30updated <- read_csv("recenttop30.csv")
+
 # Pulled the updated top 30 journals csv file from the given excel sheet from overton database. 
 View(top30updated)
 

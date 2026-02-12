@@ -1,0 +1,56 @@
+---
+title: "Cleaning DB Files"
+author: "Khristiannne L Ermino"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    df_print: kable
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy.opts = list(width.cutoff = 60), tidy=TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+# Loading cleanDB.csv File
+```{r}
+df <- read_delim("cleanDB_wip.csv") %>%
+  mutate(common = str_to_title(common))
+View(df)
+```
+
+The "common" species name was converted to title case for consistency.
+
+# Grouping Common and Latin Names with NAs
+```{r}
+na_commonandlatin <- df %>%
+  filter(is.na(common), is.na(latin)) %>% #Filtered for species that contain NAs in their common and latin columns. 
+  group_by(pub.title) %>% #Grouped them by the pub.title column. 
+  summarise(count = n())
+head(na_commonandlatin) 
+```
+
+Showed only on pub.title doesn't have either common or latin names which makes sense since this assessment is on the Athabasca endemics which encompasses multiple species. Also shows that there are 63 citations from this assessment.
+
+# Selecting the Most Recent Assessments
+```{r}
+#Wanted to check if there's a more efficient way. Found a function online that selects the max value. Used on "year" column while grouping "common" column. 
+cleanestdb <- df %>%
+  group_by(common) %>%
+  slice_max(order_by = year) #Found function online that allows us to select max value. 
+View(cleanestdb) 
+
+write_delim(cleanestdb, "cleanestdb.csv", delim = ',')
+
+group_by(journal)
+```
+
