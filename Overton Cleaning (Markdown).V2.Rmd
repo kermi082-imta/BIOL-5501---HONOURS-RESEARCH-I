@@ -44,10 +44,10 @@ Using the str_extract function, we are accessing the column "title" from the dat
 
 ```{r}
 test %>% 
-  mutate(year = str_extract(test$title,"(\\d\\d\\d\\d)+(?=E)")) 
+  mutate(title_year = str_extract(test$title,"(\\d\\d\\d\\d)+(?=E)")) 
 ```
 
-Using the mutate function alongside the str_extract function, the 4 wildcard digits that are before the "E" from the title in the "test" data frame is taken and mutated to create a new column in the "test" data frame called "year". 
+Using the mutate function alongside the str_extract function, the 4 wildcard digits that are before the "E" from the title in the "test" data frame is taken and mutated to create a new column in the "test" data frame called "title_year". 
 
 # Testing the Separate Function for Species Name Pull
 ```{r}
@@ -63,24 +63,54 @@ The separate function is used once again, with the contents of the int1 column b
 
 Using the separate function, the contents of the "full.spp" column is separated with the separator being ", ", keeping the contents of both sides of the separator with the contents prior placed in the "Common" column and the contents after the separator placed in the "Latin" column.
 
-# Full df Clean 
+# Full df Clean - Creating new dataframe, renaming columns, and date extractions. 
 ```{r}
 df.pub.year <- df %>% 
   rename(title = "Title of citing document", pub.date = "Cited published on date") %>%
-  separate(pub.date, into = c("pub.year"), sep = '-', extra = "drop") 
+  separate(pub.date, into = c("journal.pub.year"), sep = '-', extra = "drop") 
 ```
 
-Cleaning title names and separating the year of publication from the "pub.date" column. From the loaded overton database called "df', the long titles were renamed for more efficient coding. Separates the first part of the "pub.date" using the "-" separator and drops the other parts. 
+This chunk creates a new dataframe called df.pub.year by modifying the original dataframe df. First, it renames the columns "Title of citing document" to title and "Cited published on date" to pub.date for easier coding. It then separates the pub.date column using "-" as a separator, extracting only the first component (the year) and storing it in a new column called journal.pub.year, while dropping the remaining parts of the date (month and day).
 
-## Making Intermediate Obj So That the String Extract Works Properly
+## Making Intermediate Object and Creating final.year Column
 
 ```{r}
 int.year <- df.pub.year %>%
-  mutate(year = str_extract(df.pub.year$title,"(\\d\\d\\d\\d)+(?=E)")) %>%
-  separate(`Published on date of citing document`, into = c("cit_doc_year"),
+  mutate(title.year = str_extract(df.pub.year$title,"(\\d\\d\\d\\d)+(?=E)")) %>%
+  separate(`Published on date of citing document`, into = c("cit.pub.year"),
     sep = "-", extra = "drop") %>%
-  mutate(year = if_else(is.na(year), cit_doc_year, year))
+  mutate(final.year = if_else(is.na(title.year), cit.pub.year, title.year))
 ```
 
-Using the str_extract, from the "title" column of the df.pub.year" data frame, take out the four wildcard digits that are found before the "E". Using the mutate function, a "year" column is created in the "int.year" data frame.
+Creates a new dataframe called "int.year" by creating more changes from the "df.pub.year" dataframe. Using the mutate function alongside the str_extract function, the 4 wildcard digits that are before the "E" from the title in the  is taken and mutated to create a new column in the "test" data frame called "title.year". Next, it uses the data from the "Published on date of citing document" column to take the year using "-" as a delimiter while the rest is dropped. The value pulled from this column is placed into a new column called "cit.pub.year". A new column called "final.year" using the if_else function, where the value is pulled from the "title.year" column if it's available if the value was unavailable the value from "cit.pub.year" column is pulled. 
 
+## Create Clean Dataframe with "spp names" Pulled Out into Common and Latin Columns
+```{r}
+df.clean <- int.year %>%
+  mutate(pub.title = title) %>%
+  separate(title, into = c(NA, "int1"), sep = "COSEWIC assessment and status report on ") %>%
+  separate(int1, into = c("full.spp", NA), sep = ", in Canada") %>%
+  separate(full.spp, into = c("common", "latin"), sep = ', ') %>%
+  select(common, latin, year, `Cited source or journal`, pub.year, pub.title)
+```
+
+Trial and error, separator can't include "the" because of the way they wrote the title. 
+
+Line 1: 
+To create a new data frame called "df.clean", the mutate function is used to create "pub.title" column from the "title" column from "int.year" data frame. 
+
+Line2: 
+Using the separate function, the title column from "int.year" was separated using "COSEWIC..." as the separator with any contents prior being ignored and contents after placed in a column called "int1". 
+
+Line 3: 
+Using the separate function, the "int1" column from "int.year.narepl" was separated with ", " being the separator with any contents prior to the separator being placed into a column called "full.spp" and contents after the separator being ignored. 
+
+Line 4:
+Using the separate function, the "full.spp" column was separated into two separate columns using ", " as the separator. Any contents prior to the separator are placed into a column called "common" and the contents after the separator are placed into a column called "latin". 
+
+Line 5: 
+Using the select function, only certain columns from the "int.year.narepl" data frame are selected to be in the new "df.clean" column. These columns are common, latin, year, 'Cited source or journal', pub.year. and pub.title. 
+
+Some NAs in the species name is due to differing titles of reports - mostly that some reports are 'update status' rather than 'status'.
+
+Some species were listed as NA in the common name as the titles were written slightly different. 
