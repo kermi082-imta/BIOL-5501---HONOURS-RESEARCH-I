@@ -91,9 +91,10 @@ df.clean <- int.year %>%
   separate(title, into = c(NA, "int1"), sep = "COSEWIC assessment and status report on ") %>%
   separate(int1, into = c("full.spp", NA), sep = ", in Canada") %>%
   separate(full.spp, into = c("common", "latin"), sep = ', ') %>%
-  select(common, latin, year, `Cited source or journal`, pub.year, pub.title)
+  select(common, latin, final.year, `Cited source or journal`, journal.pub.year, pub.title)
 ```
 
+This chunk creates a new cleaned dataframe called "df.clean" using the "int.year" dataframe.
 Trial and error, separator can't include "the" because of the way they wrote the title. 
 
 Line 1: 
@@ -113,4 +114,124 @@ Using the select function, only certain columns from the "int.year.narepl" data 
 
 Some NAs in the species name is due to differing titles of reports - mostly that some reports are 'update status' rather than 'status'.
 
+There are four year-related columns created throughout this markdown The journal.pub.year column represents the publication year of the cited source, extracted from the “Cited published on date” field. The cit.pub.year column reflects the publication year of the citing document, taken from the “Published on date of citing document” field. The title.year column is derived directly from the report title using a regular expression to extract a four-digit year embedded in the text. Finally, final.year consolidates the year information by prioritizing title.year when available and using cit.pub.year as a fallback when the title year is missing.
+
 Some species were listed as NA in the common name as the titles were written slightly different. 
+# Pull All the Species that have NA as Common because They're Update Reports
+```{r}
+update.spp <- df.clean %>%
+  filter(is.na(common))
+```
+
+Using the filter function, a new data frame is created from "df.clean" where the "common" column has NA entries. 
+
+## Separate All Names Based on Update Status Report
+```{r}
+update.clean <- update.spp %>%
+  separate(pub.title, into = c(NA, "int1"), sep = "COSEWIC assessment and update status report on ", remove = F) %>%
+  separate(int1, into = c("full.spp", NA), sep = ", in Canada") %>%
+  separate(full.spp, into = c("common", "latin"), sep = ', ') %>%
+  select(common, latin, final.year, `Cited source or journal`, journal.pub.year, pub.title)
+```
+
+Test to see if there are any NAs left. 
+```{r}
+update.clean %>%
+  distinct(common) %>%
+  filter(is.na(common))
+#Shows there aren't NAs left, therefore it worked. 
+
+head(df.clean)
+head(update.clean)
+```
+
+## Removal of All Spp with Common = NA
+```{r}
+df.clean.noups <- df.clean %>%
+  filter(!is.na(common))
+# Removing these spp becase those spp are now in update.clean
+```
+
+## Status Report Spp and Update Status Report Spp are Combined
+```{r}
+df.clean.combo <- bind_rows(df.clean.noups, update.clean)
+```
+
+Checking for any NAs in the common name column. 
+```{r}
+missing.common <- df.clean.combo %>%
+  filter(is.na(common)) # none! 
+```
+
+Checking for any NAs in the latin name column. 
+```{r}
+missing.latin <- df.clean.combo %>%
+  filter(is.na(latin)) 
+# Shows 872 species. 
+```
+
+## Cleaning the "missing.latin" Dataframe
+```{r}
+clean.missing.lat <- missing.latin %>%
+  separate(common, into = c(NA, "common"), sep = 'the ') %>%
+  separate(common, into = c("common", NA), sep = ' in Canada.') %>%
+  separate(common, into = c("common", "latin"), sep = ' \\(')
+```
+
+Line 1: 
+Using the separate function, the "common" column from "missing.latin" is separated using the separator "the " and the contents prior are ignored while the contents after the separator are placed into a new column in the "clean.missing.lat" df called "common". 
+
+Line 2: 
+Using the separate function, the "common" column from "missing.latin" is separated using the separator " in Canada." and the contents prior are placed into a new column in the "clean.missing.lat" df called "common" while the contents after the separator are ignored. 
+
+Line 3: 
+Using the separate function, the "common" column from "missing.latin" is separated using the separator " \\(" with the contents prior placed into a column in "clean.missing.lat" df called "common" and the contents after are placed into a column called "latin". 
+
+```{r}
+clean.missing.lat$latin <- gsub(")", "", clean.missing.lat$latin)
+```
+In the latin column a gsub ")" replace it with noting in the clean.missing.lat$latin column which will be save in the clean.missing.lat.
+
+# Remove spp with NAs in Latin 
+```{r}
+final.clean <- df.clean.combo %>%
+  filter(!is.na(latin)) %>% 
+  bind_rows(clean.missing.lat) %>%
+  separate(common, into = c(NA, "common"), sep = 'the ') %>%
+  rename(source = "Cited source or journal")
+```
+The final.clean data frame contains missing species that don't have latin names. 
+
+# Entries that Require Manual Changing due to Pattern Inconsistencies
+```{r}
+missing.latin.final <- final.clean %>% 
+  filter(is.na(latin)) %>%
+  distinct(pub.title) # only NA 
+# All reports in the current data frame that don't have a latin name. 
+```
+
+# Looking for Species without Common Names
+```{r}
+missing.common.final <- final.clean %>%
+  filter(is.na(common)) %>%
+  distinct(latin)
+```
+Requires manual placement of common names for the species. 
+
+# Duplication Years - Find the Most Recent
+```{r}
+dup.years <- final.clean %>%
+  select(-c(source)) %>%
+  group_by(common, latin) %>%
+  summarise(n.years = n_distinct(final.year), .groups = "drop") %>%
+  filter(n.years > 1)
+```
+66 species that have more than 2 observation. Find more recent year and choose that one.Make a clean csv without the duplicates.
+
+# Write Out CSVs
+```{r}
+write_delim(missing.latin.final, "overton_withSara/missingLatinupdate1.csv", delim = ',')
+write_delim(missing.common.final, "overton_withSara/missingCommonupdate1.csv", delim = ',')
+write_delim(dup.years, "overton_withSara/dupYearsupdate1.csv", delim = ',')
+write_delim(final.clean, "overton_withSara/cleanDBupdate1.csv", delim = ',')
+```

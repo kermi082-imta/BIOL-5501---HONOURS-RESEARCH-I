@@ -41,7 +41,7 @@ View(na.journals)
 testlist %>%
   filter(is.na(ISSN) & is.na(eISSN)) %>%
   count()
-# Shows that there are 430 journals that have NAs in both ISSN and eISSN columns. 
+# Shows that there are 430 journals that have NAs in both ISSN and eISSN
 ```
 ```{r}
 write_delim(testlist,"christielist/testlist.csv", delim = ',')
