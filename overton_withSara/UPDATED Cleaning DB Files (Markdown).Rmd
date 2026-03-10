@@ -20,6 +20,7 @@ knitr::opts_chunk$set(echo = TRUE, tidy.opts = list(width.cutoff = 60), tidy=TRU
 ```{r}
 library(tidyverse)
 library(dplyr)
+library(ggplot2)
 ```
 
 # Loading cleanDB.csv File
@@ -41,7 +42,7 @@ head(na_commonandlatin)
 ```
 
 No entries! No entries were missed in the manual placement of data. 
-
+Double Checking. 
 ```{r}
 df %>%
   filter(common == "American Eel") %>%
@@ -68,7 +69,51 @@ View(missing_year_df)
 ```
 
 #Shows how many that 129 entries don't have a value in the journal.pub.year
-Should we remove them? 
+Should we remove them? - YES.
+
+Removing NAs from journal.pub.year
+```{r}
+df_cleanforfigure <- df %>%
+  filter(!is.na(journal.pub.year))
+View(df_cleanforfigure)
+
+df_cleanforfigure %>%
+  filter(is.na(journal.pub.year)) %>%
+  count()
+View(df_cleanforfigure)
+```
+
+```{r}
+write_delim(df_cleanforfigure, "overton_withSara/df_cleanforfigure.csv", delim = ',')
+```
+
+Creating the Stacked Bar Plot
+```{r}
+figureplot <- df_cleanforfigure %>%
+  mutate(source_type = ifelse(is.na(source), "Grey Literature", "Academic Journal"))
+View(figureplot)
+
+year_count <-figureplot %>%
+  group_by(final.year, source_type) %>%
+  summarise(n = n(), .groups = "drop")
+View(year_count)
+
+ggplot(year_count, aes(x = final.year, y = n, fill = source_type)) +
+  geom_bar(stat = "identity") +
+  labs(
+    x = "Year of publication",
+    y = "Number of citations",
+    fill = "Information source"
+  ) +
+  scale_fill_manual(values = c(
+    "Grey Literature" = "#E69F00",
+    "Academic Journal" = "#0072B2"
+  )) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Need to remove NA source for next steps. 
 ```{r}
 df_clean <- cleanestdb %>%
   filter(!is.na(source))
