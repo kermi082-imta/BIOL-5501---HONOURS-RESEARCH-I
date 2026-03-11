@@ -44,6 +44,27 @@ head(na_commonandlatin)
 No entries! No entries were missed in the manual placement of data. 
 Double Checking. 
 ```{r}
+figureplot1 <- df %>%
+  mutate(source_type = ifelse(is.na(source), "Grey Literature", "Academic Journal"))
+View(figureplot1)
+
+year_count1 <-figureplot1 %>%
+  group_by(final.year, source_type) %>%
+  summarise(n = n(), .groups = "drop")
+View(year_count1)
+
+ggplot(year_count1, aes(x = final.year, y = n, fill = source_type)) +
+  geom_bar(stat = "identity") +
+  labs(
+    x = "Year of publication",
+    y = "Number of citations",
+    fill = "Information source") +
+  scale_fill_manual(values = c(
+    "Academic Journal" = "#0072B2",
+    "Grey Literature" = "#E69F00")) + theme_classic() 
+```
+
+```{r}
 df %>%
   filter(common == "American Eel") %>%
   distinct(final.year)
@@ -87,7 +108,7 @@ View(df_cleanforfigure)
 write_delim(df_cleanforfigure, "overton_withSara/df_cleanforfigure.csv", delim = ',')
 ```
 
-Creating the Stacked Bar Plot
+Creating the Stacked Bar Plot - AFTER MOST RECENT
 ```{r}
 figureplot <- df_cleanforfigure %>%
   mutate(source_type = ifelse(is.na(source), "Grey Literature", "Academic Journal"))
@@ -106,11 +127,10 @@ ggplot(year_count, aes(x = final.year, y = n, fill = source_type)) +
     fill = "Information source"
   ) +
   scale_fill_manual(values = c(
-    "Grey Literature" = "#E69F00",
-    "Academic Journal" = "#0072B2"
+    "Academic Journal" = "#0072B2",
+    "Grey Literature" = "#E69F00"
   )) +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme_classic() 
 ```
 
 Need to remove NA source for next steps. 

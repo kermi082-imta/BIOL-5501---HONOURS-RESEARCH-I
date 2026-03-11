@@ -1,0 +1,51 @@
+---
+title: "List for Christie"
+author: "Khristianne Ermino"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+khris <- read_delim("testkhris.csv") %>%
+  rename(journal = "journals_cited") %>%
+  mutate(journal = str_to_upper(journal)) %>%
+  select(-count)
+christie <- read_delim("christielist.csv") %>%
+  rename(journal = "Journal title") %>%
+  select(journal, ISSN, eISSN)
+
+testlist <- left_join(khris,christie, by = c("journal" = "journal"))
+
+i.nas <- is.na(testlist$ISSN)
+sum(i.nas)
+e.nas <- is.na(testlist$eISSN)
+sum(e.nas)
+
+na.journals <- testlist %>%
+  filter(is.na(ISSN) & is.na(eISSN)) %>%
+  select(journal)
+
+#Create the list of journal names that have both NAs in their respective ISSN and eISSN columns. 
+
+View(na.journals)
+
+testlist %>%
+  filter(is.na(ISSN) & is.na(eISSN)) %>%
+  count()
+# Shows that there are 430 journals that have NAs in both ISSN and eISSN
+```
+```{r}
+write_delim(testlist,"christielist/testlist.csv", delim = ',')
+write_delim(na.journals,"christielist/na.journals.csv", delim = ',')
+
+```
+
