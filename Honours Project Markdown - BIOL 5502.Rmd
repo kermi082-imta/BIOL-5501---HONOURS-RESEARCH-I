@@ -422,13 +422,11 @@ sheet_names <- excel_sheets(file)
 combined_data <- sheet_names %>%
   set_names() %>% 
   map_dfr(~{
-    df <- read_excel(path = file, sheet = .x) # read in each sheet
+    df <- read_excel(path = file, sheet = .x, col_types = c("text","text","text","text","text","text","text", "numeric", "numeric")) # read in each sheet
     df %>% 
       rename(journal_name = contains("Journal name"), # standardize column names
         impact_factor = contains("JIF"),
         citable_items = contains("citable items")) %>%
-      mutate(impact_factor = as.numeric(impact_factor), # fix data types
-        citable_items = as.numeric(citable_items)) %>%
       mutate(year = .x) %>% # add the year column based on the sheet name
       select(journal_name, year, impact_factor, citable_items)
   }, .id = "source_sheet") # .id is optional, tracks which sheet it came from
@@ -496,15 +494,13 @@ View(sent_mostcleanestdb)
 ```
 
 ```{r}
-combined_final_df <- left_join(sent_mostcleanestdb,
+left_combined_final_df <- left_join(sent_mostcleanestdb,
  sent_renamed_final_clean_df,
   by = c("source", "journal.pub.year"))
-View(combined_final_df)
+View(left_combined_final_df)
 
-combined_final_df <- right_join(sent_mostcleanestdb,
- sent_renamed_final_clean_df,
-  by = c("source", "journal.pub.year"))
-View(combined_final_df)
+test <- combined_final_df %>%
+  filter(!is.na(common))
 
 full_combined_final_df <- full_join(sent_mostcleanestdb,
  sent_renamed_final_clean_df,
@@ -513,11 +509,17 @@ View(full_combined_final_df)
 
 cleaned_full_combined_final_df <- na.omit(full_combined_final_df)
 View(cleaned_full_combined_final_df) # Only 73 entries, obviously wrong. 
+
 ```
 
 Change Christie's source names from all capitals. Convert to sentence case. 
 str_to_sentence()
 christie %>% mutate(journal.name = str_to_sentence(journal.name))
+
+```{r}
+write_delim(sent_mostcleanestdb, "khris_cleanestdata.csv", delim = ',')
+write_delim(sent_renamed_final_clean_df, "christie_cleanestdata.csv", delim = ',')
+```
 
 
 
