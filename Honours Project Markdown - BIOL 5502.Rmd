@@ -353,6 +353,7 @@ ggplot(year_count, aes(x = final.year, y = n, fill = source_type)) +
   )) +
   theme_classic() 
 ```
+### Truncate the white space. Edit on power point. 
 
 Need to remove NA source for next steps. 
 ```{r}
@@ -464,6 +465,7 @@ View(mostcleanestdb)
 
 ```{r}
 library(dplyr)
+library(stringr)
 ```
 
 Rename final_clean_df - make sure all column names are the same from mostcleanestdb. 
@@ -472,15 +474,52 @@ Renaming Column Names for left_join
 ```{r}
 renamed_final_clean_df <- final_clean_df %>%
   rename(source = journal_name,
-         journal.pub.year = year)
+         journal.pub.year = year) %>%
+  mutate(journal.pub.year = as.numeric(journal.pub.year))
 View(renamed_final_clean_df)
+
+upper_renamed_final_clean_df <- renamed_final_clean_df %>%
+  mutate(source = str_to_upper(source))
+View(upper_renamed_final_clean_df)
+
+sent_renamed_final_clean_df <- upper_renamed_final_clean_df %>%
+  mutate(source = str_to_sentence(source))
+View(sent_renamed_final_clean_df)
+
+upper_mostcleanestdb <- mostcleanestdb %>%
+  mutate(source = str_to_upper(source))
+View(upper_mostcleanestdb)
+
+sent_mostcleanestdb <- upper_mostcleanestdb %>%
+  mutate(source = str_to_sentence(source))
+View(sent_mostcleanestdb)
 ```
 
 ```{r}
-combined_final_df <- left_join( mostcleanestdb,
-  renamed_final_clean_df,
+combined_final_df <- left_join(sent_mostcleanestdb,
+ sent_renamed_final_clean_df,
   by = c("source", "journal.pub.year"))
+View(combined_final_df)
+
+combined_final_df <- right_join(sent_mostcleanestdb,
+ sent_renamed_final_clean_df,
+  by = c("source", "journal.pub.year"))
+View(combined_final_df)
+
+full_combined_final_df <- full_join(sent_mostcleanestdb,
+ sent_renamed_final_clean_df,
+  by = c("source", "journal.pub.year")) 
+View(full_combined_final_df)
+
+cleaned_full_combined_final_df <- na.omit(full_combined_final_df)
+View(cleaned_full_combined_final_df) # Only 73 entries, obviously wrong. 
 ```
+
+Change Christie's source names from all capitals. Convert to sentence case. 
+str_to_sentence()
+christie %>% mutate(journal.name = str_to_sentence(journal.name))
+
+
 
 MAIN DF: 
 
