@@ -417,6 +417,7 @@ file <- "~/Desktop/BIOL 5501/BIOL 5501 RESEARCH/overton_withSara/christie_data.x
 
 # grab all names of tabs in excel file
 sheet_names <- excel_sheets(file) 
+View(sheet_names)
 
 # read in and combine all sheets into one, rename columns to match, fix data types, keep source ID of sheet 
 combined_data <- sheet_names %>%
@@ -430,6 +431,7 @@ combined_data <- sheet_names %>%
       mutate(year = .x) %>% # add the year column based on the sheet name
       select(journal_name, year, impact_factor, citable_items)
   }, .id = "source_sheet") # .id is optional, tracks which sheet it came from
+View(combined_data)
 
 clean_data <- combined_data %>%
   distinct(journal_name, year, .keep_all = TRUE) # removes duplicated entries ensuring only one unique journal name per year is kept
